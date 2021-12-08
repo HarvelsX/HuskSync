@@ -112,6 +112,9 @@ public final class HuskSyncBungeeCord extends Plugin {
         // Prepare the migrator for use if needed
         mpdbMigrator = new MPDBMigrator(getBungeeLogger());
 
+        // Prepare the migrator for use if needed
+        mpdbMigrator = new MPDBMigrator();
+
         // Initialize bStats metrics
         try {
             new Metrics(this, METRICS_ID);
