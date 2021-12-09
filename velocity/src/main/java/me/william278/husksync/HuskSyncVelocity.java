@@ -1,6 +1,7 @@
 package me.william278.husksync;
 
 import com.google.inject.Inject;
+import com.google.inject.Provides;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
@@ -74,7 +75,6 @@ public class HuskSyncVelocity {
     private final ProxyServer server;
     private final Path dataDirectory;
 
-    // Get the data folder
     public File getDataFolder() {
         return dataDirectory.toFile();
     }
