@@ -164,7 +164,7 @@ public class RedisMessage {
     /**
      * Deserialize an object from a Base64 string
      */
-    public static Object deserialize(String s) throws IOException, ClassNotFoundException {
+    public static Object deserialize(final String s) throws IOException, ClassNotFoundException {
         byte[] data = Base64.getDecoder().decode(s);
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return objectInputStream.readObject();
@@ -174,7 +174,7 @@ public class RedisMessage {
     /**
      * Serialize an object to a Base64 string
      */
-    public static String serialize(Serializable o) throws IOException {
+    public static String serialize(final Serializable o) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
             objectOutputStream.writeObject(o);

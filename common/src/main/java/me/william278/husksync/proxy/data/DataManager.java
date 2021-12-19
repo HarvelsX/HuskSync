@@ -340,7 +340,7 @@ public class DataManager {
          *
          * @param newData The player's new/updated {@link PlayerData}
          */
-        public void updatePlayer(PlayerData newData) {
+        public void updatePlayer(final PlayerData newData) {
             this.playerData.put(newData.getPlayerUUID(), newData);
         }
 

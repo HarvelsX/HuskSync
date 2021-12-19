@@ -9,6 +9,7 @@ import me.william278.husksync.Settings;
 import me.william278.husksync.redis.RedisMessage;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -23,13 +24,10 @@ public class VelocityEventListener {
             // Ensure the player has data on SQL and that it is up-to-date
             HuskSyncVelocity.dataManager.ensurePlayerExists(player.getUniqueId(), player.getUsername());
 
-            // Get the player's data from SQL
-            final Map<Settings.SynchronisationCluster, PlayerData> data = HuskSyncVelocity.dataManager.getPlayerData(player.getUniqueId());
-
             // Update the player's data from SQL onto the cache
-            assert data != null;
-            for (Settings.SynchronisationCluster cluster : data.keySet()) {
-                HuskSyncVelocity.dataManager.playerDataCache.get(cluster).updatePlayer(data.get(cluster));
+            for (Settings.SynchronisationCluster cluster : Settings.clusters) {
+                final PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerData(cluster, player.getUniqueId());
+                HuskSyncVelocity.dataManager.playerDataCache.get(cluster).updatePlayer(playerData);
             }
 
             // Send a message asking the bukkit to request data on join

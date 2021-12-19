@@ -11,6 +11,8 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -25,13 +27,11 @@ public class BungeeEventListener implements Listener {
             // Ensure the player has data on SQL and that it is up-to-date
             HuskSyncBungeeCord.dataManager.ensurePlayerExists(player.getUniqueId(), player.getName());
 
-            // Get the player's data from SQL
-            final Map<Settings.SynchronisationCluster,PlayerData> data = HuskSyncBungeeCord.dataManager.getPlayerData(player.getUniqueId());
-
             // Update the player's data from SQL onto the cache
-            assert data != null;
-            for (Settings.SynchronisationCluster cluster : data.keySet()) {
-                HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).updatePlayer(data.get(cluster));
+            for (Settings.SynchronisationCluster cluster : Settings.clusters) {
+                final PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerData(cluster, player.getUniqueId());
+                HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster)
+                        .updatePlayer(playerData);
             }
 
             // Send a message asking the bukkit to request data on join

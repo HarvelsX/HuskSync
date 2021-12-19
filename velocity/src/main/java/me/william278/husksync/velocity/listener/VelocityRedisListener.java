@@ -36,7 +36,7 @@ public class VelocityRedisListener extends RedisListener {
                     return cachedData;
                 }
 
-                data = Objects.requireNonNull(HuskSyncVelocity.dataManager.getPlayerData(uuid)).get(cluster); // Get their player data from MySQL
+                data = HuskSyncVelocity.dataManager.getPlayerData(cluster, uuid); // Get their player data from MySQL
                 HuskSyncVelocity.dataManager.playerDataCache.get(cluster).updatePlayer(data); // Update the cache
                 break;
             }
