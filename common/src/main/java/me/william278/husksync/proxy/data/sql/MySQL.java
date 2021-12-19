@@ -5,6 +5,7 @@ import me.william278.husksync.Settings;
 import me.william278.husksync.util.Logger;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;

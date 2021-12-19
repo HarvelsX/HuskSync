@@ -34,7 +34,7 @@ public class BungeeRedisListener extends RedisListener {
             // Get the player data from the cache
             PlayerData data = HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).getPlayer(uuid);
             if (data == null) {
-                data = Objects.requireNonNull(HuskSyncBungeeCord.dataManager.getPlayerData(uuid)).get(cluster); // Get their player data from MySQL
+                data = HuskSyncBungeeCord.dataManager.getPlayerData(cluster, uuid); // Get their player data from MySQL
                 HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).updatePlayer(data); // Update the cache
             }
             return data;

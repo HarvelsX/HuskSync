@@ -327,7 +327,7 @@ public class BungeeCommand extends Command implements TabExecutor, HuskSyncComma
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 if (!cluster.clusterId().equals(clusterId)) continue;
-                PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerDataByName(targetPlayerName, cluster.clusterId());
+                PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerDataByName(targetPlayerName, cluster);
                 if (playerData == null) {
                     viewer.sendMessage(new MineDown(MessageManager.getMessage("error_invalid_player")).toComponent());
                     return;
@@ -361,7 +361,7 @@ public class BungeeCommand extends Command implements TabExecutor, HuskSyncComma
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 if (!cluster.clusterId().equals(clusterId)) continue;
-                PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerDataByName(targetPlayerName, cluster.clusterId());
+                PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerDataByName(targetPlayerName, cluster);
                 if (playerData == null) {
                     viewer.sendMessage(new MineDown(MessageManager.getMessage("error_invalid_player")).toComponent());
                     return;

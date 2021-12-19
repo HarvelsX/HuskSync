@@ -320,7 +320,7 @@ public class VelocityCommand implements SimpleCommand, HuskSyncCommand {
         plugin.getProxyServer().getScheduler().buildTask(plugin, () -> {
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 if (!cluster.clusterId().equals(clusterId)) continue;
-                PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerDataByName(targetPlayerName, cluster.clusterId());
+                PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerDataByName(targetPlayerName, cluster);
                 if (playerData == null) {
                     viewer.sendMessage(new MineDown(MessageManager.getMessage("error_invalid_player")).toComponent());
                     return;
@@ -354,7 +354,7 @@ public class VelocityCommand implements SimpleCommand, HuskSyncCommand {
         plugin.getProxyServer().getScheduler().buildTask(plugin, () -> {
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 if (!cluster.clusterId().equals(clusterId)) continue;
-                PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerDataByName(targetPlayerName, cluster.clusterId());
+                PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerDataByName(targetPlayerName, cluster);
                 if (playerData == null) {
                     viewer.sendMessage(new MineDown(MessageManager.getMessage("error_invalid_player")).toComponent());
                     return;
