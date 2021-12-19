@@ -28,21 +28,19 @@ public class BungeeRedisListener extends RedisListener {
     }
 
     private PlayerData getPlayerCachedData(UUID uuid, String clusterId) {
-        PlayerData data = null;
         for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-            if (cluster.clusterId().equals(clusterId)) {
-                // Get the player data from the cache
-                PlayerData cachedData = HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).getPlayer(uuid);
-                if (cachedData != null) {
-                    return cachedData;
-                }
+            if (!cluster.clusterId().equals(clusterId)) continue;
 
+            // Get the player data from the cache
+            PlayerData data = HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).getPlayer(uuid);
+            if (data == null) {
                 data = Objects.requireNonNull(HuskSyncBungeeCord.dataManager.getPlayerData(uuid)).get(cluster); // Get their player data from MySQL
                 HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).updatePlayer(data); // Update the cache
-                break;
             }
+            return data;
         }
-        return data; // Return the data
+
+        return null;
     }
 
     /**
@@ -68,16 +66,19 @@ public class BungeeRedisListener extends RedisListener {
                 ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
                     try {
                         // Send the reply, serializing the message data
-                        new RedisMessage(RedisMessage.MessageType.PLAYER_DATA_SET,
+                        new RedisMessage(
+                                RedisMessage.MessageType.PLAYER_DATA_SET,
                                 new RedisMessage.MessageTarget(Settings.ServerType.BUKKIT, requestingPlayerUUID, message.getMessageTarget().targetClusterId()),
-                                RedisMessage.serialize(getPlayerCachedData(requestingPlayerUUID, message.getMessageTarget().targetClusterId())))
-                                .send();
+                                RedisMessage.serialize(getPlayerCachedData(requestingPlayerUUID, message.getMessageTarget().targetClusterId()))
+                        ).send();
 
                         // Send an update to all bukkit servers removing the player from the requester cache
-                        new RedisMessage(RedisMessage.MessageType.REQUEST_DATA_ON_JOIN,
+                        new RedisMessage(
+                                RedisMessage.MessageType.REQUEST_DATA_ON_JOIN,
                                 new RedisMessage.MessageTarget(Settings.ServerType.BUKKIT, null, message.getMessageTarget().targetClusterId()),
-                                RedisMessage.RequestOnJoinUpdateType.REMOVE_REQUESTER.toString(), requestingPlayerUUID.toString())
-                                .send();
+                                RedisMessage.RequestOnJoinUpdateType.REMOVE_REQUESTER.toString(),
+                                requestingPlayerUUID.toString()
+                        ).send();
 
                         // Send synchronisation complete message
                         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(requestingPlayerUUID);

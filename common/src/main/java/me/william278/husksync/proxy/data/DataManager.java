@@ -1,5 +1,7 @@
 package me.william278.husksync.proxy.data;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import me.william278.husksync.PlayerData;
 import me.william278.husksync.Settings;
 import me.william278.husksync.proxy.data.sql.Database;
@@ -10,7 +12,11 @@ import me.william278.husksync.util.Logger;
 import java.io.File;
 import java.sql.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class DataManager {
@@ -326,11 +332,9 @@ public class DataManager {
      */
     public static class PlayerDataCache {
         // The cached player data
-        public HashSet<PlayerData> playerData;
-
-        public PlayerDataCache() {
-            playerData = new HashSet<>();
-        }
+        public final Cache<UUID, PlayerData> playerData = CacheBuilder.newBuilder()
+                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .build();
 
         /**
          * Update ar add data for a player to the cache
@@ -338,19 +342,7 @@ public class DataManager {
          * @param newData The player's new/updated {@link PlayerData}
          */
         public void updatePlayer(PlayerData newData) {
-            // Remove the old data if it exists
-            PlayerData oldData = null;
-            for (PlayerData data : playerData) {
-                if (data.getPlayerUUID() == newData.getPlayerUUID()) {
-                    oldData = data;
-                }
-            }
-            if (oldData != null) {
-                playerData.remove(oldData);
-            }
-
-            // Add the new data
-            playerData.add(newData);
+            this.playerData.put(newData.getPlayerUUID(), newData);
         }
 
         /**
@@ -360,12 +352,7 @@ public class DataManager {
          * @return The player's {@link PlayerData}
          */
         public PlayerData getPlayer(UUID playerUUID) {
-            for (PlayerData data : playerData) {
-                if (data.getPlayerUUID() == playerUUID) {
-                    return data;
-                }
-            }
-            return null;
+            return this.playerData.getIfPresent(playerUUID);
         }
 
     }
