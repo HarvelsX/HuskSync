@@ -28,19 +28,7 @@ public class BungeeRedisListener extends RedisListener {
     }
 
     private PlayerData getPlayerCachedData(UUID uuid, String clusterId) {
-        for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-            if (!cluster.clusterId().equals(clusterId)) continue;
-
-            // Get the player data from the cache
-            PlayerData data = HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).getPlayer(uuid);
-            if (data == null) {
-                data = HuskSyncBungeeCord.dataManager.getPlayerData(cluster, uuid); // Get their player data from MySQL
-                HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).updatePlayer(data); // Update the cache
-            }
-            return data;
-        }
-
-        return null;
+        return HuskSyncBungeeCord.dataManager.playerDataCache.get(clusterId).getPlayer(uuid);
     }
 
     /**

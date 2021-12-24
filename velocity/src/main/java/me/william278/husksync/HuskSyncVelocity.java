@@ -139,11 +139,6 @@ public class HuskSyncVelocity {
                     "HuskSync will now abort loading itself (Velocity) v" + VERSION);
         }
 
-        // Setup player data cache
-        for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-            dataManager.playerDataCache.put(cluster, new DataManager.PlayerDataCache());
-        }
-
         // Initialize the redis listener
         if (!new VelocityRedisListener().isActiveAndEnabled) {
             getVelocityLogger().severe("Failed to initialize Redis; HuskSync will now abort loading itself (Velocity) v" + VERSION);

@@ -13,8 +13,10 @@ import java.io.File;
 import java.sql.*;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -31,7 +33,11 @@ public class DataManager {
     /**
      * The player data cache for each cluster ID
      */
-    public HashMap<Settings.SynchronisationCluster, PlayerDataCache> playerDataCache = new HashMap<>();
+    public Map<String, PlayerDataCache> playerDataCache = new HashMap<>() {{
+        for (Settings.SynchronisationCluster cluster : Settings.clusters) {
+            put(cluster.clusterId(), new PlayerDataCache(cluster));
+        }
+    }};
     // Flag variable identifying if the data manager failed to initialize
     public boolean hasFailedInitialization = false;
 
@@ -216,10 +222,10 @@ public class DataManager {
         // Ignore if the Spigot server didn't properly sync the previous data
 
         // Add the new player data to the cache
-        playerDataCache.get(cluster).updatePlayer(playerData);
+        playerDataCache.get(cluster.clusterId()).updatePlayer(playerData);
 
         // SQL: If the player has cached data, update it, otherwise insert new data.
-        if (playerHasCachedData(playerData.getPlayerUUID(), cluster)) {
+        if (existPlayerData(playerData.getPlayerUUID(), cluster)) {
             updatePlayerSQLData(playerData, cluster);
         } else {
             insertPlayerData(playerData, cluster);
@@ -312,7 +318,7 @@ public class DataManager {
      * @param playerUUID The UUID of the player
      * @return {@code true} if the player has an entry in the data table
      */
-    private boolean playerHasCachedData(UUID playerUUID, Settings.SynchronisationCluster cluster) {
+    private boolean existPlayerData(UUID playerUUID, Settings.SynchronisationCluster cluster) {
         try (Connection connection = getConnection(cluster.clusterId());
              PreparedStatement statement = connection.prepareStatement(
                      "SELECT * FROM " + cluster.dataTableName() + " WHERE `player_id`=(SELECT `id` FROM " + cluster.playerTableName() + " WHERE `uuid`=?);")
@@ -329,11 +335,17 @@ public class DataManager {
     /**
      * A cache of PlayerData
      */
-    public static class PlayerDataCache {
+    public class PlayerDataCache {
         // The cached player data
         public final Cache<UUID, PlayerData> playerData = CacheBuilder.newBuilder()
-                .expireAfterWrite(5, TimeUnit.MINUTES)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
                 .build();
+
+        private final Settings.SynchronisationCluster cluster;
+
+        public PlayerDataCache(Settings.SynchronisationCluster cluster) {
+            this.cluster = cluster;
+        }
 
         /**
          * Update ar add data for a player to the cache
@@ -351,7 +363,12 @@ public class DataManager {
          * @return The player's {@link PlayerData}
          */
         public PlayerData getPlayer(UUID playerUUID) {
-            return this.playerData.getIfPresent(playerUUID);
+            try {
+                return this.playerData.get(playerUUID, () -> DataManager.this.getPlayerData(this.cluster, playerUUID));
+            } catch (ExecutionException e) {
+                DataManager.this.logger.log(Level.SEVERE, "Error getting data for " + playerUUID + " player", e);
+                return null;
+            }
         }
 
     }

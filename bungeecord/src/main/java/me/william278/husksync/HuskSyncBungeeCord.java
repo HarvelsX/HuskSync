@@ -92,11 +92,6 @@ public final class HuskSyncBungeeCord extends Plugin {
                     "HuskSync will now abort loading itself (" + getProxy().getName() + ") v" + getDescription().getVersion());
         }
 
-        // Setup player data cache
-        for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-            dataManager.playerDataCache.put(cluster, new DataManager.PlayerDataCache());
-        }
-
         // Initialize the redis listener
         if (!new BungeeRedisListener().isActiveAndEnabled) {
             getBungeeLogger().severe("Failed to initialize Redis; HuskSync will now abort loading itself (" + getProxy().getName() + ") v" + getDescription().getVersion());
