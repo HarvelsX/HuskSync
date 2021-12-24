@@ -108,7 +108,7 @@ public class DataManager {
     private boolean playerExists(UUID playerUUID, Settings.SynchronisationCluster cluster) {
         try (Connection connection = getConnection(cluster.clusterId());
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT EXISTS(SELECT * FROM " + cluster.playerTableName() + " WHERE `uuid`=?);")
+                     "SELECT * FROM " + cluster.playerTableName() + " WHERE `uuid`=?;")
         ) {
             statement.setString(1, playerUUID.toString());
 

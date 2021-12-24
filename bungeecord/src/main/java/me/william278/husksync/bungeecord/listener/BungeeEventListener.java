@@ -30,7 +30,7 @@ public class BungeeEventListener implements Listener {
             // Update the player's data from SQL onto the cache
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 final PlayerData playerData = HuskSyncBungeeCord.dataManager.getPlayerData(cluster, player.getUniqueId());
-                HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster)
+                HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster.clusterId())
                         .updatePlayer(playerData);
             }
 
