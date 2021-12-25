@@ -163,22 +163,22 @@ public class PlayerSetter {
                     ArrayList<DataSerializer.AdvancementRecord> advancementRecords
                             = DataSerializer.deserializeAdvancementData(data.getSerializedAdvancements());
 
-                    if (Settings.useNativeImplementation)
-                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                            try {
-                                nativeSyncPlayerAdvancements(player, advancementRecords);
-                            } catch (Exception e) {
-                                plugin.getLogger().log(Level.WARNING,
-                                        "Your server does not support a native implementation of achievements synchronization");
-                                plugin.getLogger().log(Level.WARNING,
-                                        "Your server version {0}. Please disable using native implementation!", Bukkit.getVersion());
+                    if (Settings.useNativeImplementation) {
+                        try {
+                            nativeSyncPlayerAdvancements(player, advancementRecords);
+                        } catch (Exception e) {
+                            plugin.getLogger().log(Level.WARNING,
+                                    "Your server does not support a native implementation of achievements synchronization");
+                            plugin.getLogger().log(Level.WARNING,
+                                    "Your server version {0}. Please disable using native implementation!", Bukkit.getVersion());
 
-                                Settings.useNativeImplementation = false;
-                                setPlayerAdvancements(player, advancementRecords, data);
-                                plugin.getLogger().fine(e.toString());
-                            }
-                        });
-                    else setPlayerAdvancements(player, advancementRecords, data);
+                            Settings.useNativeImplementation = false;
+                            setPlayerAdvancements(player, advancementRecords, data);
+                            plugin.getLogger().log(Level.SEVERE, e.getMessage(), e);
+                        }
+                    } else {
+                        setPlayerAdvancements(player, advancementRecords, data);
+                    }
                 }
                 if (Settings.syncInventories) {
                     setPlayerInventory(player, DataSerializer.deserializeInventory(data.getSerializedInventory()));
@@ -284,7 +284,6 @@ public class PlayerSetter {
         // Clear
         AdvancementUtils.clearPlayerAdvancementsMap(playerAdvancements);
 
-        final Map<Object, List<String>> syncAdvancementMap = new HashMap<>();
         advancementRecords.forEach(advancementRecord -> {
             NamespacedKey namespacedKey = Objects.requireNonNull(
                     NamespacedKey.fromString(advancementRecord.advancementKey()),
@@ -293,27 +292,25 @@ public class PlayerSetter {
 
             Advancement bukkitAdvancement = Bukkit.getAdvancement(namespacedKey);
             if (bukkitAdvancement == null) {
-                // todo: write logging
+                plugin.getLogger().log(Level.WARNING, "Ignored advancement '{0}' - it doesn't exist anymore?", namespacedKey);
                 return;
             }
 
-            syncAdvancementMap.put(
-                    AdvancementUtils.getHandle(bukkitAdvancement),
-                    advancementRecord.awardedAdvancementCriteria()
-            );
-        });
+            // todo: sync date of get advancement
+            Date date = Date.from(Instant.now().minus(Period.ofWeeks(1)));
 
-        // todo: sync date of get advancement
-        Date date = Date.from(Instant.now().minus(Period.ofWeeks(1)));
+            Object advancement = AdvancementUtils.getHandle(bukkitAdvancement);
+            List<String> criteriaList = advancementRecord.awardedAdvancementCriteria();
+            {
+                Map<String, Object> nativeCriteriaMap = new HashMap<>();
+                criteriaList.forEach(criteria ->
+                        nativeCriteriaMap.put(criteria, AdvancementUtils.newCriterionProgress(date))
+                );
+                Object nativeAdvancementProgress = AdvancementUtils.newAdvancementProgress(nativeCriteriaMap);
 
-        syncAdvancementMap.forEach((advancement, criteriaList) -> {
-            Map<String, Object> nativeCriteriaMap = new HashMap<>();
-            criteriaList.forEach(criteria ->
-                    nativeCriteriaMap.put(criteria, AdvancementUtils.newCriterionProgress(date))
-            );
-            Object nativeAdvancementProgress = AdvancementUtils.newAdvancementProgress(nativeCriteriaMap);
+                AdvancementUtils.startProgress(playerAdvancements, advancement, nativeAdvancementProgress);
 
-            AdvancementUtils.startProgress(playerAdvancements, advancement, nativeAdvancementProgress);
+            }
         });
 
         AdvancementUtils.markPlayerAdvancementsFirst(playerAdvancements);
