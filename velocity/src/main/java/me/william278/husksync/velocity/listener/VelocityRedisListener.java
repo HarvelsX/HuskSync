@@ -27,21 +27,7 @@ public class VelocityRedisListener extends RedisListener {
     }
 
     private PlayerData getPlayerCachedData(UUID uuid, String clusterId) {
-        PlayerData data = null;
-        for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-            if (cluster.clusterId().equals(clusterId)) {
-                // Get the player data from the cache
-                PlayerData cachedData = HuskSyncVelocity.dataManager.playerDataCache.get(cluster).getPlayer(uuid);
-                if (cachedData != null) {
-                    return cachedData;
-                }
-
-                data = HuskSyncVelocity.dataManager.getPlayerData(cluster, uuid); // Get their player data from MySQL
-                HuskSyncVelocity.dataManager.playerDataCache.get(cluster).updatePlayer(data); // Update the cache
-                break;
-            }
-        }
-        return data; // Return the data
+        return HuskSyncVelocity.dataManager.playerDataCache.get(clusterId).getPlayer(uuid); // Return the data
     }
 
     /**

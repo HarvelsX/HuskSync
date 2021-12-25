@@ -27,7 +27,7 @@ public class VelocityEventListener {
             // Update the player's data from SQL onto the cache
             for (Settings.SynchronisationCluster cluster : Settings.clusters) {
                 final PlayerData playerData = HuskSyncVelocity.dataManager.getPlayerData(cluster, player.getUniqueId());
-                HuskSyncVelocity.dataManager.playerDataCache.get(cluster).updatePlayer(playerData);
+                HuskSyncVelocity.dataManager.playerDataCache.get(cluster.clusterId()).updatePlayer(playerData);
             }
 
             // Send a message asking the bukkit to request data on join

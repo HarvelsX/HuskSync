@@ -163,7 +163,7 @@ public class DataManager {
                 final UUID uuid = UUID.fromString(resultSet.getString("uuid"));
 
                 // Get the player data from the cache if it's there, otherwise pull from SQL
-                PlayerData playerData = playerDataCache.get(cluster).getPlayer(uuid);
+                PlayerData playerData = playerDataCache.get(cluster.clusterId()).getPlayer(uuid);
                 if (playerData == null) {
                     playerData = Objects.requireNonNull(getPlayerData(cluster, uuid));
                 }

@@ -151,7 +151,7 @@ public class BungeeCommand extends Command implements TabExecutor, HuskSyncComma
                         }
                         int playerDataSize = 0;
                         for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-                            playerDataSize += HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster).playerData.size();
+                            playerDataSize += HuskSyncBungeeCord.dataManager.playerDataCache.get(cluster.clusterId()).playerData.size();
                         }
                         sender.sendMessage(new MineDown(MessageManager.PLUGIN_STATUS.toString()
                                 .replaceAll("%1%", String.valueOf(HuskSyncBungeeCord.synchronisedServers.size()))

@@ -144,7 +144,7 @@ public class VelocityCommand implements SimpleCommand, HuskSyncCommand {
                         }
                         int playerDataSize = 0;
                         for (Settings.SynchronisationCluster cluster : Settings.clusters) {
-                            playerDataSize += HuskSyncVelocity.dataManager.playerDataCache.get(cluster).playerData.size();
+                            playerDataSize += HuskSyncVelocity.dataManager.playerDataCache.get(cluster.clusterId()).playerData.size();
                         }
                         sender.sendMessage(new MineDown(MessageManager.PLUGIN_STATUS.toString()
                                 .replaceAll("%1%", String.valueOf(HuskSyncVelocity.synchronisedServers.size()))
